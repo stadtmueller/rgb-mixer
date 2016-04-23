@@ -1,590 +1,815 @@
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.event.*;
-import java.awt.datatransfer.*;
-import java.awt.event.*;
+package de.stadtmueller.rgbmixer;
+
+import java.awt.AWTEvent;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.PointerInfo;
+import java.awt.Robot;
+import java.awt.Toolkit;
+import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.BorderFactory;
+import javax.swing.JSlider;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JSeparator;
+
 
 public class Mainframe extends JFrame
 {
+	private static final long serialVersionUID = 7888194461715698140L;
 
-    int red = 0;
-    int green = 0;
-    int blue = 0;
-    Color color = new Color( red, green, blue );
+	private Color resultColor = new Color( 0, 0, 0 );
+	
+	private JPanel resultColorPanel;
+	
+	private JPanel contentPane;
+	private JTextField redTextField;
+	private JSlider redSlider;
+	private JSlider greenSlider;
+	private JTextField greenTextField;
+	private JSlider blueSlider;
+	private JTextField blueTextField;
+	private JLabel hexLabel;
+	private JLabel rgbLabel;
+	
+	private ColorPreview preview = new ColorPreview();
 
-    public Mainframe()
-    {
-        initComponents();
-    }
+	public static void main( String[] args )
+	{
+		EventQueue.invokeLater( new Runnable()
+		{
+			public void run()
+			{
+				try
+				{
+					Mainframe frame = new Mainframe();
+					frame.setVisible( true );
+				} catch( Exception e )
+				{
+					e.printStackTrace();
+				}
+			}
+		} );
+	}
 
-    @SuppressWarnings("unchecked")
-    private void initComponents()
-    {
-
-        jPanel1 = new JPanel();
-        headLabel = new JLabel();
-        redPlusButton = new JButton();
-        redMinusButton = new JButton();
-        redTextField = new JTextField();
-        greenPlusButton = new JButton();
-        greenMinusButton = new JButton();
-        greenTextField = new JTextField();
-        bluePlusButton = new JButton();
-        blueMinusButton = new JButton();
-        blueTextField = new JTextField();
-        redPanel = new JPanel();
-        bluePanel = new JPanel();
-        greenPanel = new JPanel();
-        resultColorPanel = new JPanel();
-        copyButton = new JButton();
-        blueSlider = new JSlider();
-        greenSlider = new JSlider();
-        redSlider = new JSlider();
-        jSeparator1 = new JSeparator();
-        exitButton = new JButton();
-        copyHexButton = new JButton();
-
-        GroupLayout jPanel1Layout = new GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 116, Short.MAX_VALUE)
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-        );
-
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setTitle("RGB-Mixer");
-
-        headLabel.setFont(new Font("Ubuntu", 0, 20)); // NOI18N
-        headLabel.setText("RGB-Mixer");
-
-        redPlusButton.setText("+");
-        redPlusButton.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent evt)
-            {
-                redPlusButtonActionPerformed(evt);
-            }
-        });
-
-        redMinusButton.setText("-");
-        redMinusButton.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent evt)
-            {
-                redMinusButtonActionPerformed(evt);
-            }
-        });
-
-        redTextField.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent evt)
-            {
-                redTextFieldActionPerformed(evt);
-            }
-        });
-
-        greenPlusButton.setText("+");
-        greenPlusButton.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent evt)
-            {
-                greenPlusButtonActionPerformed(evt);
-            }
-        });
-
-        greenMinusButton.setText("-");
-        greenMinusButton.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent evt)
-            {
-                greenMinusButtonActionPerformed(evt);
-            }
-        });
-
-        greenTextField.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent evt)
-            {
-                greenTextFieldActionPerformed(evt);
-            }
-        });
-
-        bluePlusButton.setText("+");
-        bluePlusButton.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent evt)
-            {
-                bluePlusButtonActionPerformed(evt);
-            }
-        });
-
-        blueMinusButton.setText("-");
-        blueMinusButton.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent evt)
-            {
-                blueMinusButtonActionPerformed(evt);
-            }
-        });
-
-        blueTextField.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent evt)
-            {
-                blueTextFieldActionPerformed(evt);
-            }
-        });
-
-        redPanel.setBackground( Color.red );
-        redPanel.setBorder( BorderFactory.createLineBorder( Color.black ));
-
-        GroupLayout redPanelLayout = new GroupLayout(redPanel);
-        redPanel.setLayout(redPanelLayout);
-        redPanelLayout.setHorizontalGroup(
-            redPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 86, Short.MAX_VALUE)
-        );
-        redPanelLayout.setVerticalGroup(
-            redPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 88, Short.MAX_VALUE)
-        );
-
-        bluePanel.setBackground( Color.blue );
-        bluePanel.setBorder( BorderFactory.createLineBorder( Color.black));
-
-        GroupLayout bluePanelLayout = new GroupLayout(bluePanel);
-        bluePanel.setLayout(bluePanelLayout);
-        bluePanelLayout.setHorizontalGroup(
-            bluePanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 83, Short.MAX_VALUE)
-        );
-        bluePanelLayout.setVerticalGroup(
-            bluePanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 88, Short.MAX_VALUE)
-        );
-
-        greenPanel.setBackground( Color.green );
-        greenPanel.setBorder( BorderFactory.createLineBorder( Color.black ));
-
-        GroupLayout greenPanelLayout = new GroupLayout(greenPanel);
-        greenPanel.setLayout(greenPanelLayout);
-        greenPanelLayout.setHorizontalGroup(
-            greenPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 86, Short.MAX_VALUE)
-        );
-        greenPanelLayout.setVerticalGroup(
-            greenPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 88, Short.MAX_VALUE)
-        );
-
-        resultColorPanel.setBackground( color );
-        resultColorPanel.setBorder( BorderFactory.createLineBorder( Color.black ));
-
-        GroupLayout resultColorPanelLayout = new GroupLayout(resultColorPanel);
-        resultColorPanel.setLayout(resultColorPanelLayout);
-        resultColorPanelLayout.setHorizontalGroup(
-            resultColorPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
-        );
-        resultColorPanelLayout.setVerticalGroup(
-            resultColorPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGap(0, 124, Short.MAX_VALUE)
-        );
-
-        copyButton.setText("Copy RGB-Notation");
-        copyButton.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent evt)
-            {
-                copyButtonActionPerformed(evt);
-            }
-        });
-
-        blueSlider.setMaximum(255);
-        blueSlider.setOrientation(JSlider.VERTICAL);
-        blueSlider.setValue(0);
-        blueSlider.addChangeListener(new ChangeListener()
-        {
-            public void stateChanged(ChangeEvent evt)
-            {
-                blueSliderStateChanged(evt);
-            }
-        });
-
-        greenSlider.setMaximum(255);
-        greenSlider.setOrientation(JSlider.VERTICAL);
-        greenSlider.setValue(0);
-        greenSlider.addChangeListener(new ChangeListener()
-        {
-            public void stateChanged(ChangeEvent evt)
-            {
-                greenSliderStateChanged(evt);
-            }
-        });
-
-        redSlider.setMaximum(255);
-        redSlider.setOrientation(JSlider.VERTICAL);
-        redSlider.setValue(0);
-        redSlider.addChangeListener(new ChangeListener()
-        {
-            public void stateChanged( ChangeEvent evt)
-            {
-                redSliderStateChanged(evt);
-            }
-        });
-
-        jSeparator1.setOrientation(SwingConstants.VERTICAL);
-
-        exitButton.setText("Exit");
-        exitButton.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent evt)
-            {
-                exitButtonActionPerformed(evt);
-            }
-        });
-
-        copyHexButton.setText("Copy Hex-Notation");
-        copyHexButton.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent evt)
-            {
-                copyHexButtonActionPerformed(evt);
-            }
-        });
-
-        GroupLayout layout = new GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addComponent(headLabel, GroupLayout.PREFERRED_SIZE, 132, GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(redSlider, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(redPlusButton, GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(redMinusButton, GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE))
-                            .addComponent(redTextField, GroupLayout.PREFERRED_SIZE, 86, GroupLayout.PREFERRED_SIZE)
-                            .addComponent(redPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addComponent(greenSlider, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(greenPlusButton, GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(greenMinusButton, GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE))
-                            .addComponent(greenTextField, GroupLayout.PREFERRED_SIZE, 86, GroupLayout.PREFERRED_SIZE)
-                            .addComponent(greenPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addComponent(blueSlider, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(bluePlusButton, GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(blueMinusButton, GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE))
-                            .addComponent(blueTextField, GroupLayout.PREFERRED_SIZE, 86, GroupLayout.PREFERRED_SIZE)
-                            .addComponent(bluePanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addComponent(jSeparator1, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(copyButton, GroupLayout.PREFERRED_SIZE, 167, GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(copyHexButton, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(18, 18, 18)
-                        .addComponent(exitButton, GroupLayout.PREFERRED_SIZE, 85, GroupLayout.PREFERRED_SIZE))
-                    .addComponent(resultColorPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(24, 24, 24))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(headLabel, GroupLayout.PREFERRED_SIZE, 36, GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
-                    .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(resultColorPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                            .addComponent(copyButton)
-                            .addComponent(exitButton)
-                            .addComponent(copyHexButton)))
-                    .addComponent(jSeparator1)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(redPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(redTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                            .addComponent(redMinusButton, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
-                            .addComponent(redPlusButton, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(greenPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(greenTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                            .addComponent(greenPlusButton, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
-                            .addComponent(greenMinusButton, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(blueSlider, GroupLayout.Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(greenSlider, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addGroup(GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(bluePanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(blueTextField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                            .addComponent(bluePlusButton, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
-                            .addComponent(blueMinusButton, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(redSlider, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addGap(14, 14, 14))
-        );
-
-        redMinusButton.getAccessibleContext().setAccessibleName("redMinusButton");
-
-        pack();
-    }
-    
-    private void redMinusButtonActionPerformed(ActionEvent evt)                                               
-    {                                                   
-        if (red > -1)
-        {
-            --red;
-        } 
-        else
-        {
-            red = 0;
-        }
-        redTextField.setText( String.valueOf( red ) );
-        color = new Color( red, green, blue );
-        resultColorPanel.setBackground( color );
-        redSlider.setValue( red );
-    }                                              
-
-    private void redPlusButtonActionPerformed(ActionEvent evt)                                              
-    {                                                  
-        if (red < 255)
-        {
-            ++red;
-        } else
-        {
-            red = 255;
-        }
-        redTextField.setText( String.valueOf( red ) );
-        color = new Color( red, green, blue );
-        resultColorPanel.setBackground( color );
-        redSlider.setValue( red );
-    }                                             
-
-    private void greenPlusButtonActionPerformed(ActionEvent evt)                                                
-    {                                                    
-        if( green < 255 )
-            ++green;
-        else
-            green = 255;
-        greenTextField.setText( String.valueOf( green ) );
-        color = new Color( red, green, blue );
-        resultColorPanel.setBackground( color );
-        greenSlider.setValue( green );
-    }                                               
-
-    private void redTextFieldActionPerformed(ActionEvent evt)                                             
-    {                                                 
-        int input = Integer.parseInt( redTextField.getText() );
-        if( input <= 255 && input >= 0 )
-            red = input;
-        else if( input < 0 )
-            red = 0;
-        else if( input > 255 )
-            red = 255;
-        redTextField.setText( String.valueOf( red ) );
-        color = new Color( red, green, blue );
-        resultColorPanel.setBackground( color );
-        redSlider.setValue( red );
-    }                                            
-
-    private void greenTextFieldActionPerformed(ActionEvent evt)                                               
-    {                                                   
-        int input = Integer.parseInt( greenTextField.getText() );
-        if( input <= 255 && input >= 0 )
-            green = input;
-        else if( input < 0 )
-            green = 0;
-        else if( input > 255 )
-            green = 255;
-        greenTextField.setText( String.valueOf( green ) );
-        color = new Color( red, green, blue );
-        resultColorPanel.setBackground( color );
-        greenSlider.setValue( green );
-    }                                              
-
-    private void blueTextFieldActionPerformed(ActionEvent evt)                                              
-    {                                                  
-        int input = Integer.parseInt( blueTextField.getText() );
-        if( input <= 255 && input >= 0 )
-            blue = input;
-        else if( input < 0 )
-            blue = 0;
-        else if( input > 255 )
-            blue = 255;
-        blueTextField.setText( String.valueOf( blue ) );
-        color = new Color( red, green, blue );
-        resultColorPanel.setBackground( color );
-        blueSlider.setValue( blue );
-    }                                             
-
-    private void greenMinusButtonActionPerformed(ActionEvent evt)                                                 
-    {                                                     
-        if( green > 0 )
-            --green;
-        else
-            green = 0;
-        greenTextField.setText( String.valueOf( green ) );
-        color = new Color( red, green, blue );
-        resultColorPanel.setBackground( color );
-        greenSlider.setValue( green );
-    }                                                
-
-    private void bluePlusButtonActionPerformed(ActionEvent evt)                                               
-    {                                                   
-        if( blue < 255 )
-            ++blue;
-        else
-            blue = 255;
-        blueTextField.setText( String.valueOf( blue ) );
-        color = new Color( red, green, blue );
-        resultColorPanel.setBackground( color );
-        blueSlider.setValue( blue );
-    }                                              
-
-    private void blueMinusButtonActionPerformed(ActionEvent evt)                                                
-    {                                                    
-        if( blue > 0 )
-            --blue;
-        else
-            blue = 0;
-        blueTextField.setText( String.valueOf( blue ) );
-        color = new Color( red, green, blue );
-        resultColorPanel.setBackground( color );
-        blueSlider.setValue( blue );
-    }                                               
-
-    private void copyButtonActionPerformed(ActionEvent evt)                                           
-    {                                               
-        String s = String.valueOf( "rgb( " + red + ", " + green + ", " + blue + " );" );
-        System.out.println( s );
-        StringSelection stse = new StringSelection( s );
+	/**
+	 * Create the frame.
+	 */
+	private void updateValues()
+	{
+		resultColorPanel.setBackground( resultColor );
+		
+		redTextField.setText( String.valueOf( resultColor.getRed() ) );
+		redSlider.setValue( resultColor.getRed() );
+		
+		greenTextField.setText( String.valueOf( resultColor.getGreen() ) );
+		greenSlider.setValue( resultColor.getGreen() );
+		
+		blueTextField.setText( String.valueOf( resultColor.getBlue() ) );
+		blueSlider.setValue( resultColor.getBlue() );
+		
+		hexLabel.setText( String.format( "#%02X%02X%02X", resultColor.getRed(), resultColor.getGreen(), resultColor.getBlue() ) );
+		rgbLabel.setText( String.format( "RGB( %s, %s, %s )", resultColor.getRed(), resultColor.getGreen(), resultColor.getBlue() ) );
+	}
+	
+	private void updateLookAndFeel( UIManager.LookAndFeelInfo info )
+	{
+		try
+		{
+			UIManager.setLookAndFeel( info.getClassName() );
+			SwingUtilities.updateComponentTreeUI( this );
+		}
+		catch( Exception ex )
+		{
+			System.out.println( ex.getClass().getSimpleName() );
+		}
+	}
+	
+	private void invertColor()
+	{
+		int newRed = 255 - resultColor.getRed();
+		int newGreen = 255 - resultColor.getGreen();
+		int newBlue = 255 - resultColor.getBlue();
+		
+		resultColor = new Color( newRed, newGreen, newBlue );
+		updateValues();
+	}
+	
+	public void copyHexToClipboard()
+	{
+		StringSelection stse = new StringSelection( hexLabel.getText() );
         Clipboard board = Toolkit.getDefaultToolkit().getSystemClipboard();
         board.setContents( stse, null );
-    }                                          
-
-    private void blueSliderStateChanged(ChangeEvent evt)                                        
-    {                                            
-            blue = blueSlider.getValue();
-            color = new Color( red, green, blue );
-            blueTextField.setText( String.valueOf( blue ) );
-            resultColorPanel.setBackground( color );
-    }                                       
-
-    private void greenSliderStateChanged(ChangeEvent evt)                                         
-    {                                             
-            green = greenSlider.getValue();
-            color = new Color( red, green, blue );
-            greenTextField.setText( String.valueOf( green ) );
-            resultColorPanel.setBackground( color );
-    }                                        
-
-    private void redSliderStateChanged(ChangeEvent evt)                                       
-    {                                           
-        red = redSlider.getValue();
-        color = new Color( red, green, blue );
-        redTextField.setText( String.valueOf( red ) );
-        resultColorPanel.setBackground( color );
-    }                                      
-
-    private void exitButtonActionPerformed(ActionEvent evt)                                           
-    {                                               
-        int reply = JOptionPane.showConfirmDialog( null,"Do you want to quit the program?", "Exit", JOptionPane.YES_NO_OPTION  );
-        if( reply == JOptionPane.YES_OPTION )
-            System.exit( 0 );
-    }                                          
-
-    private void copyHexButtonActionPerformed(ActionEvent evt)                                              
-    {                                                  
-        String s = String.format( "#%02X%02X%02X", red, green, blue );
-        StringSelection stse = new StringSelection( s );
+	}
+	
+	public void copyRGBToClipboard()
+	{
+		StringSelection stse = new StringSelection( rgbLabel.getText() );
         Clipboard board = Toolkit.getDefaultToolkit().getSystemClipboard();
         board.setContents( stse, null );
-        
-    }                                             
-
-    public static void main(String args[])
-    {
-        try
-        {
-            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())
-            {
-                if ("Nimbus".equals(info.getName()))
-                {
-                    UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex)
-        {
-            java.util.logging.Logger.getLogger(Mainframe.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex)
-        {
-            java.util.logging.Logger.getLogger(Mainframe.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex)
-        {
-            java.util.logging.Logger.getLogger(Mainframe.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (UnsupportedLookAndFeelException ex)
-        {
-            java.util.logging.Logger.getLogger(Mainframe.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        EventQueue.invokeLater(new Runnable()
-        {
-            public void run()
-            {
-                new Mainframe().setVisible(true);
-            }
-        });
-    }
-
-    private JButton blueMinusButton;
-    private JPanel bluePanel;
-    private JButton bluePlusButton;
-    private JSlider blueSlider;
-    private JTextField blueTextField;
-    private JButton copyButton;
-    private JButton copyHexButton;
-    private JButton exitButton;
-    private JButton greenMinusButton;
-    private JPanel greenPanel;
-    private JButton greenPlusButton;
-    private JSlider greenSlider;
-    private JTextField greenTextField;
-    private JLabel headLabel;
-    private JPanel jPanel1;
-    private JSeparator jSeparator1;
-    private JButton redMinusButton;
-    private JPanel redPanel;
-    private JButton redPlusButton;
-    private JSlider redSlider;
-    private JTextField redTextField;
-    private JPanel resultColorPanel;
+	}
+	
+	public Mainframe()
+	{
+		setTitle( "RGB-Mixer - V3" );
+		setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+		setBounds( 100, 100, 871, 316 );
+		//setResizable( false );
+		
+		//
+		//	-------------------------- Init the menubar -------------------------------------------
+		//
+		
+		
+		// The menu bar
+		JMenuBar menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+		contentPane = new JPanel();
+		contentPane.setBorder( new EmptyBorder( 5, 5, 5, 5 ) );
+		setContentPane( contentPane );
+		
+		
+		// The file menu
+		JMenu file = new JMenu( "File" );
+		menuBar.add( file );
+		
+		// Copy menu items
+		JMenuItem copyRGBNotation = new JMenuItem( "Copy RGB-Notation" );
+		copyRGBNotation.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				copyRGBToClipboard();
+			}
+		} );
+		file.add( copyRGBNotation );
+		
+		JMenuItem copyHexNotation = new JMenuItem( "Copy Hex-Notation" );
+		copyHexNotation.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				copyHexToClipboard();
+			}
+		});
+		file.add( copyHexNotation );
+		
+		// Separator
+		file.addSeparator();
+		
+		// Color operations
+		JMenuItem brighterColorMenuItem = new JMenuItem( "Brighter" );
+		brighterColorMenuItem.addActionListener( new ActionListener()
+		{	
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				resultColor = resultColor.brighter();
+				updateValues();
+			}
+		});
+		file.add( brighterColorMenuItem );
+		
+		JMenuItem darkerColorMenuItem = new JMenuItem( "Darker" );
+		darkerColorMenuItem.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				resultColor = resultColor.darker();
+				updateValues();
+			}
+		});
+		file.add( darkerColorMenuItem );
+		
+		JMenuItem invertColorMenuItem = new JMenuItem( "Invert Color" );
+		invertColorMenuItem.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				invertColor();		
+			}
+		} );
+		file.add( invertColorMenuItem );
+		
+		JMenuItem previewMenuItem = new JMenuItem( "Preview" );
+		previewMenuItem.addActionListener( new ActionListener()
+		{	
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				preview.setPreviewColor( resultColor );
+				preview.setVisible( true, UIManager.getLookAndFeel() );
+			}
+		});
+		file.add( previewMenuItem );
+		
+		// Separator
+		file.addSeparator();
+		
+		// Presets
+		JMenuItem redColorMenuItem = new JMenuItem( "Red" );
+		redColorMenuItem.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				resultColor = Color.red;
+				updateValues();
+			}
+		});
+		file.add( redColorMenuItem );
+		
+		JMenuItem greenColorMenuItem = new JMenuItem( "Green" );
+		greenColorMenuItem.addActionListener( new ActionListener()
+		{
+			
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				resultColor = Color.green;
+				updateValues();
+			}
+		});
+		file.add( greenColorMenuItem );
+		
+		JMenuItem blueColorMenuItem = new JMenuItem( "Blue" );
+		blueColorMenuItem.addActionListener( new ActionListener()
+		{
+			
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				resultColor = Color.blue;
+				updateValues();
+			}
+		});
+		file.add( blueColorMenuItem );
+		
+		JMenuItem blackColorMenuItem = new JMenuItem( "Black" );
+		blackColorMenuItem.addActionListener( new ActionListener()
+		{
+			
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				resultColor = Color.black;
+				updateValues();
+			}
+		});
+		file.add( blackColorMenuItem );
+		
+		JMenuItem whiteColorMenuItem = new JMenuItem( "White" );
+		whiteColorMenuItem.addActionListener( new ActionListener()
+		{
+			
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				resultColor = Color.white;
+				updateValues();
+			}
+		});
+		file.add( whiteColorMenuItem );
+		
+		JMenuItem cyanColorMenuItem = new JMenuItem( "Cyan" );
+		cyanColorMenuItem.addActionListener( new ActionListener()
+		{
+			
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				resultColor = Color.cyan;
+				updateValues();
+			}
+		});
+		file.add( cyanColorMenuItem );
+		
+		JMenuItem magentaColorMenuItem = new JMenuItem( "Magenta" );
+		magentaColorMenuItem.addActionListener( new ActionListener()
+		{
+			
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				resultColor = Color.magenta;
+				updateValues();
+			}
+		});
+		file.add( magentaColorMenuItem );
+		
+		JMenuItem yellowColorMenuItem = new JMenuItem( "Yellow" );
+		yellowColorMenuItem.addActionListener( new ActionListener()
+		{
+			
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				resultColor = Color.yellow;
+				updateValues();
+			}
+		});
+		file.add( yellowColorMenuItem );
+		
+		JMenuItem darkGrayColorMenuItem = new JMenuItem( "Dark gray" );
+		darkGrayColorMenuItem.addActionListener( new ActionListener()
+		{
+			
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				resultColor = Color.darkGray;
+				updateValues();
+			}
+		});
+		file.add( darkGrayColorMenuItem );
+		
+		JMenuItem grayColorMenuItem = new JMenuItem( "Gray" );
+		grayColorMenuItem.addActionListener( new ActionListener()
+		{
+			
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				resultColor = Color.gray;
+				updateValues();
+			}
+		});
+		file.add( grayColorMenuItem );
+		
+		JMenuItem lightGrayColorMenuItem = new JMenuItem( "Light Gray" );
+		lightGrayColorMenuItem.addActionListener( new ActionListener()
+		{
+			
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				resultColor = Color.lightGray;
+				updateValues();
+			}
+		});
+		file.add( lightGrayColorMenuItem );
+		
+		JMenuItem orangeColorMenuItem = new JMenuItem( "Orange" );
+		orangeColorMenuItem.addActionListener( new ActionListener()
+		{
+			
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				resultColor = Color.orange;
+				updateValues();
+			}
+		});
+		file.add( orangeColorMenuItem );
+		
+		JMenuItem pinkColorMenuItem = new JMenuItem( "Pink" );
+		pinkColorMenuItem.addActionListener( new ActionListener()
+		{
+			
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				resultColor = Color.pink;
+				updateValues();
+			}
+		});
+		file.add( pinkColorMenuItem );
+		
+		// Separator
+		file.addSeparator();
+		
+		// Exit
+		JMenuItem exitMenuItem = new JMenuItem( "Exit" );
+		exitMenuItem.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				System.exit( 0 );
+			}
+		} );
+		file.add( exitMenuItem );
+		
+		
+		// The appearance menu
+		JMenu appearance = new JMenu( "Appearance" );
+		menuBar.add( appearance );
+		
+		JMenuItem item;
+		
+		for( UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels() )
+		{
+			item = new JMenuItem( info.getName() );
+			item.addActionListener( new ActionListener()
+			{
+				@Override
+				public void actionPerformed( ActionEvent e )
+				{
+					updateLookAndFeel( info );
+				}
+			});
+			appearance.add( item );
+		}
+		
+		
+		// The About menu
+		JMenu about = new JMenu( "About" );
+		menuBar.add( about );
+		
+		JMenuItem versionMenuEntry = new JMenuItem( "Version" );
+		versionMenuEntry.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				JOptionPane.showMessageDialog( null, "RGB-Mixer - V3\nA color mixing tool writen in Java", "Version", JOptionPane.INFORMATION_MESSAGE );
+			}
+		});
+		about.add( versionMenuEntry );
+		
+		
+		//
+		// ---------------------------------- Done: Init menubar ---------------------------------------
+		//
+		
+		
+		redTextField = new JTextField();
+		redTextField.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				int val;
+				
+				try
+				{
+					val = Integer.parseInt( redTextField.getText() );
+				}
+				catch( NumberFormatException redNumberException )
+				{
+					val = resultColor.getRed();
+				}
+				
+				if( val > 255 )
+					val = 255;
+				else if( val < 0 )
+					val = 0;
+				
+				resultColor = new Color( val, resultColor.getGreen(), resultColor.getBlue() );
+				updateValues();
+			}
+		});
+		redTextField.setBounds(10, 195, 100, 27);
+		redTextField.setColumns(3);
+		
+		redSlider = new JSlider();
+		redSlider.setBounds(10, 11, 34, 178);
+		redSlider.setMaximum(255);
+		redSlider.setValue( 0 );
+		redSlider.setOrientation(SwingConstants.VERTICAL);
+		redSlider.addChangeListener( new ChangeListener()
+		{
+			@Override
+			public void stateChanged( ChangeEvent e )
+			{
+				resultColor = new Color( redSlider.getValue(), resultColor.getGreen(), resultColor.getBlue() );
+				updateValues();
+			}
+		} );
+		
+		JPanel redPanel = new JPanel();
+		redPanel.setBounds(45, 11, 65, 178);
+		redPanel.setBackground( Color.red );
+		redPanel.setBorder( BorderFactory.createLineBorder( Color.black ) );
+		
+		JButton redPlusButton = new JButton("+");
+		redPlusButton.setBounds(10, 228, 45, 30);
+		redPlusButton.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( ActionEvent e )
+			{
+				if( resultColor.getRed() == 255 )
+					return;
+				else
+					resultColor = new Color( resultColor.getRed() + 1, resultColor.getGreen(), resultColor.getBlue() );
+					
+				updateValues();
+			}
+		} );
+		
+		JButton redMinusButton = new JButton("-");
+		redMinusButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if( resultColor.getRed() == 0 )
+					return;
+				else
+					resultColor = new Color( resultColor.getRed() - 1, resultColor.getGreen(), resultColor.getBlue() );
+				
+				updateValues();
+			}
+		});
+		redMinusButton.setBounds(65, 228, 45, 30);
+		
+		greenSlider = new JSlider();
+		greenSlider.setValue( 0 );
+		greenSlider.setBounds(129, 11, 34, 178);
+		greenSlider.setOrientation(SwingConstants.VERTICAL);
+		greenSlider.setMaximum( 255 );
+		greenSlider.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				resultColor = new Color( resultColor.getRed(), greenSlider.getValue(), resultColor.getBlue() );
+				updateValues();
+			}
+		});
+		
+		greenTextField = new JTextField();
+		greenTextField.setBounds(130, 195, 100, 27);
+		greenTextField.setColumns(3);
+		greenTextField.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				int val;
+				
+				try
+				{
+					val = Integer.parseInt( greenTextField.getText() );
+				}
+				catch( NumberFormatException greenNumberException )
+				{
+					val = resultColor.getGreen();
+				}
+				
+				if( val > 255 )
+					val = 255;
+				else if( val < 0 )
+					val = 0;
+				
+				resultColor = new Color( resultColor.getRed(), val, resultColor.getBlue() );
+				updateValues();
+			}
+		});
+		
+		JButton greenPlusButton = new JButton("+");
+		greenPlusButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if( resultColor.getGreen() == 255 )
+					return;
+				else
+					resultColor = new Color( resultColor.getRed(), resultColor.getGreen() + 1, resultColor.getBlue() );
+					
+				updateValues();
+			}
+		});
+		greenPlusButton.setBounds(130, 228, 45, 30);
+		
+		JButton greenMinusButton = new JButton("-");
+		greenMinusButton.setBounds(185, 228, 45, 30);
+		greenMinusButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if( resultColor.getGreen() == 0 )
+					return;
+				else
+					resultColor = new Color( resultColor.getRed(), resultColor.getGreen() - 1, resultColor.getBlue() );
+				
+				updateValues();
+			}
+		});
+		
+		JPanel greenPanel = new JPanel();
+		greenPanel.setBounds(165, 11, 65, 178);
+		greenPanel.setBackground( Color.green );
+		greenPanel.setBorder( BorderFactory.createLineBorder( Color.black ) );
+		
+		blueSlider = new JSlider();
+		blueSlider.setBounds(250, 11, 34, 178);
+		blueSlider.setOrientation(SwingConstants.VERTICAL);
+		blueSlider.setMaximum( 255 );
+		blueSlider.setValue( 0 );
+		blueSlider.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				resultColor = new Color( resultColor.getRed(), resultColor.getGreen(), blueSlider.getValue() );
+				updateValues();
+			}
+		});
+		
+		JPanel bluePanel = new JPanel();
+		bluePanel.setBounds(285, 11, 65, 178);
+		bluePanel.setBackground( Color.blue );
+		bluePanel.setBorder( BorderFactory.createLineBorder( Color.black ) );
+		contentPane.setLayout(null);
+		contentPane.add(redSlider);
+		contentPane.add(redPanel);
+		contentPane.add(redTextField);
+		contentPane.add(redPlusButton);
+		contentPane.add(redMinusButton);
+		contentPane.add(greenPlusButton);
+		contentPane.add(greenMinusButton);
+		contentPane.add(greenTextField);
+		contentPane.add(greenSlider);
+		contentPane.add(greenPanel);
+		contentPane.add(blueSlider);
+		contentPane.add(bluePanel);
+		
+		blueTextField = new JTextField();
+		blueTextField.setBounds(250, 195, 100, 27);
+		contentPane.add(blueTextField);
+		blueTextField.setColumns(3);
+		blueTextField.addActionListener(new ActionListener() 
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				int val;
+				
+				try
+				{
+					val = Integer.parseInt( blueTextField.getText() );
+				}
+				catch( NumberFormatException greenNumberException )
+				{
+					val = resultColor.getBlue();
+				}
+				
+				if( val > 255 )
+					val = 255;
+				else if( val < 0 )
+					val = 0;
+				
+				resultColor = new Color( resultColor.getRed(), resultColor.getGreen(), val );
+				updateValues();
+			}
+		});
+		
+		JButton bluePlusButton = new JButton("+");
+		bluePlusButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if( resultColor.getBlue() == 255 )
+					return;
+				else
+					resultColor = new Color( resultColor.getRed(), resultColor.getGreen(), resultColor.getBlue() + 1 );
+					
+				updateValues();
+			}
+		});
+		bluePlusButton.setBounds(250, 228, 45, 30);
+		contentPane.add(bluePlusButton);
+		
+		JButton blueMinusButton = new JButton("-");
+		blueMinusButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				if( resultColor.getBlue() == 0 )
+					return;
+				else
+					resultColor = new Color( resultColor.getRed(), resultColor.getGreen(), resultColor.getBlue() - 1 );
+				
+				updateValues();
+			}
+		});
+		blueMinusButton.setBounds(305, 228, 45, 30);
+		contentPane.add(blueMinusButton);
+		
+		JLabel lblHex = new JLabel("Hex:");
+		lblHex.setBounds(381, 11, 45, 27);
+		contentPane.add(lblHex);
+		
+		JLabel lblRgb = new JLabel("RGB:");
+		lblRgb.setBounds(381, 44, 45, 27);
+		contentPane.add(lblRgb);
+		
+		hexLabel = new JLabel();
+		hexLabel.setFont(new Font("DejaVu Sans", Font.PLAIN, 16));
+		hexLabel.setBounds(438, 11, 134, 27);
+		contentPane.add(hexLabel);
+		
+		rgbLabel = new JLabel();
+		rgbLabel.setFont(new Font("DejaVu Sans", Font.PLAIN, 16));
+		rgbLabel.setBounds(438, 44, 187, 27);
+		contentPane.add(rgbLabel);
+		
+		JButton copyHexButton = new JButton("Copy");
+		copyHexButton.setBounds(637, 11, 80, 27);
+		copyHexButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				copyHexToClipboard();
+			}
+		});
+		contentPane.add(copyHexButton);
+		
+		JButton copyRGBButton = new JButton("Copy");
+		copyRGBButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				copyRGBToClipboard();
+			}
+		});
+		copyRGBButton.setBounds(637, 44, 80, 27);
+		contentPane.add(copyRGBButton);
+		
+		resultColorPanel = new JPanel();
+		resultColorPanel.setBounds(381, 77, 336, 181);
+		contentPane.add(resultColorPanel);
+		resultColorPanel.setBackground( resultColor );
+		resultColorPanel.setBorder( BorderFactory.createLineBorder( Color.black, 2 ) );
+		
+		JButton invertButton = new JButton("Invert");
+		invertButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				invertColor();
+			}
+		});
+		invertButton.setBounds(741, 77, 118, 27);
+		contentPane.add(invertButton);
+		
+		JButton brighterButton = new JButton("Brighter");
+		brighterButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				resultColor = resultColor.brighter();
+				updateValues();
+			}
+		});
+		brighterButton.setBounds(741, 11, 118, 27);
+		contentPane.add(brighterButton);
+		
+		JButton darkerButton = new JButton("Darker");
+		darkerButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				resultColor = resultColor.darker();
+				updateValues();
+			}
+		});
+		darkerButton.setBounds(741, 44, 118, 27);
+		contentPane.add(darkerButton);
+		
+		JButton previewButton = new JButton("Preview");
+		previewButton.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				preview.setPreviewColor( resultColor );
+				preview.setVisible( true, UIManager.getLookAndFeel() );
+			}
+		});
+		previewButton.setBounds(741, 110, 118, 27);
+		contentPane.add(previewButton);
+		
+		JSeparator separatorRGBValues = new JSeparator();
+		separatorRGBValues.setOrientation(SwingConstants.VERTICAL);
+		separatorRGBValues.setBounds(362, 12, 15, 246);
+		contentPane.add(separatorRGBValues);
+		
+		JSeparator separatorValuesControlls = new JSeparator();
+		separatorValuesControlls.setOrientation(SwingConstants.VERTICAL);
+		separatorValuesControlls.setBounds(729, 12, 15, 246);
+		contentPane.add(separatorValuesControlls);
+		
+		// Initial update
+		updateValues();
+	}
 }
