@@ -1,2 +1,2 @@
 # rgb-mixer
-RGB color mixing tool using.
+Graphical RGB color mixing tool.
